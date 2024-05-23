@@ -34,6 +34,11 @@ For a full list of dependencies see: `conda.txt`, dependencies in `requirements.
 
 ## Usage
 
+For demo data, here is a small dataset that can be used to test the model. The data is already basecalled using Guppy/Dorado, and the raw data is in the `demo/fast5` folder. The basecalled data is in the `demo/fastq` folder.
+Example outputs are in `demo/basecall_out` and `demo/modcall_out`.
+
+[Download link](https://surfdrive.surf.nl/files/index.php/s/X2kRYzBOg68eQwc)
+
 ### Basecalling
 
 First, we have to basecall the raw data (`.fast5` files) using our basecalling model. You will also need the already basecalled (`.fastq` files) from Guppy/Dorado. This will generate a `.fastq` file with the basecalled sequences, as well as a `.npz` file that can be used as input for our second model.
