@@ -45,15 +45,14 @@ if __name__ == "__main__":
     print('Found all relevant fastq files')
 
     print('Loading Remora model')
-    with open('/hpc/compgen/users/mpages/remox2/remox/models/remora_config.json', 'r') as model_configs:
-        model_configs = json.load(model_configs)
-
     remora_model = RemoraModel(
         device = args.device,
         dataset = None,
         size = 256, 
         dropout = 0, 
-        **model_configs['single_rse'],
+        use_raw = True,
+        use_seq_1 = True,
+        use_expected_signal_1 = True,
     )
     checkpoint = torch.load(args.model_file)
 
