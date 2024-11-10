@@ -82,6 +82,37 @@ python3 scripts/modcall.py \
 ```
 Again, please check `static/kmer_performance.txt` to decide what threshold to use per 5-mer based on the FP rate and your 8-oxo-dG expected abundance. In our work we used a threshold of 0.95 for most 5-mers. 5-mers not in the training dataset will have 0 fp and 0 fn.
 
+### Model training
+
+We provide scripts to process the oligo data from fast5 and fastq files into an adequate input format for model training. We also provide a script to train a model using the processed data with the used configuration in our research.
+
+#### Data
+
+In this repository we provide demo files to test the scripts. The oligo dataset can be found in the ENA repository under the accession number [PRJEB46810](https://www.ebi.ac.uk/ena/browser/view/PRJEB76712).
+
+#### Mapping oligo repeats
+
+Here we check which oligos compose the repeats in each read and try to determine the random bases. 
+
+```
+python scripts/dev/map_oligo_repeats.py \
+--fastq-dir demo/dev/fastq \
+--ref-file demo/dev/oligo_ref.fasta \
+--output-file demo/dev/oligo_repeats.txt
+```
+
+#### Making oligo references
+
+Based on the composition of each oligo concatemer read, we define a reference sequence for each read.
+
+
+```
+python scripts/dev/make_oligo_references.py \
+--mapped-file demo/dev/oligo_repeats.txt \
+--ref-file demo/dev/oligo_ref.fasta \
+--output-dir demo/dev
+```
+
 ## Why is it called esox?
 
 Most nanopore tools have fish names, and esox is the [genus of the pike fish](https://en.wikipedia.org/wiki/Esox), which ends in "ox", as in oxidation.
