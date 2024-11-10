@@ -124,6 +124,19 @@ python scripts/dev/resquiggle_oligo.py \
 --output-file demo/dev/oligo_resquiggle/demo.fasta
 ```
 
+#### Prepare data for training
+
+We prepare the data for training by creating a dataset with the resquiggled data and the references.
+
+```
+python scripts/dev/prepare_nn_input.py \
+--reference-file demo/dev/oligo_references/demo.fasta \
+--fast5-file demo/dev/fast5/demo.fast5 \
+--resquiggle-file demo/dev/oligo_resquiggle/demo.fasta \
+--output-file demo/dev/nn_input/demo.npz
+
+```
+
 ## Why is it called esox?
 
 Most nanopore tools have fish names, and esox is the [genus of the pike fish](https://en.wikipedia.org/wiki/Esox), which ends in "ox", as in oxidation.
