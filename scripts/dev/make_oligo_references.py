@@ -58,7 +58,7 @@ def reconstruct_read_blocks(read_df):
 
     return constr
 
-def make_read_reference(read_df, oligo_references, fasta_queue, ref_queue, phred_queue):
+def make_read_reference(read_df, oligo_references, fasta_queue):
 
     refs_in_read = list()
     for r in np.unique(read_df['ref']):
@@ -119,25 +119,13 @@ def make_read_reference(read_df, oligo_references, fasta_queue, ref_queue, phred
     write_str = '>'+str(np.unique(read_df['read_id'])[0]) + '\n' + final_ref + '\n'
     fasta_queue.put(write_str)
 
-    write_str = str(np.unique(read_df['read_id'])[0]) + '\t' + longest_ref + '\n'
-    ref_queue.put(write_str)
-
-    write_str = '>'+str(np.unique(read_df['read_id'])[0]) +'\n' +";".join(ref_seq)+'\n+\n'+ phredq_pos_ref + '\n'
-    phred_queue.put(write_str)
-
-def main(mapped_file, oligo_ref_file, output_dir, n_cores):
+def main(mapped_file, oligo_ref_file, output_file, n_cores):
 
 
     manager = mp.Manager() 
     fasta_queue = manager.Queue()  # write queue
-    ref_queue = manager.Queue()  # write queue
-    phred_queue = manager.Queue()  # write queue
     pool = mp.Pool(n_cores + 2) # pool for multiprocessing
-    p = mp.Process(target = listener_writer, args = (fasta_queue, os.path.join(output_dir, 'read_references.fasta')))
-    p.start()
-    p = mp.Process(target = listener_writer, args = (ref_queue, os.path.join(output_dir, 'read_references.tsv')))
-    p.start()
-    p = mp.Process(target = listener_writer, args = (phred_queue, os.path.join(output_dir, 'read_references_phred.fastq')))
+    p = mp.Process(target = listener_writer, args = (fasta_queue, output_file))
     p.start()
 
     mapped_df = pd.read_csv(mapped_file, header = 0, index_col = None)
@@ -167,7 +155,7 @@ def main(mapped_file, oligo_ref_file, output_dir, n_cores):
         if len(read_df) < 5:
             continue
         
-        job = pool.apply_async(make_read_reference, (read_df, oligo_references, fasta_queue, ref_queue, phred_queue))
+        job = pool.apply_async(make_read_reference, (read_df, oligo_references, fasta_queue))
         jobs.append(job)
 
     for job in tqdm(jobs):
@@ -178,14 +166,6 @@ def main(mapped_file, oligo_ref_file, output_dir, n_cores):
     while not fasta_queue.empty():
         time.sleep(1)
 
-    ref_queue.put('kill')
-    while not ref_queue.empty():
-        time.sleep(1)
-
-    phred_queue.put('kill')
-    while not phred_queue.empty():
-        time.sleep(1)
-    
     pool.close()
     pool.join()
     p.join()
@@ -198,7 +178,7 @@ if __name__ == "__main__":
                         help='File with the oligo to basecalls mapping')
     parser.add_argument('--ref-file', type=str,
                         help='Fasta file with oligo references')
-    parser.add_argument('--output-dir', type=str,
+    parser.add_argument('--output-file', type=str,
                         help='Dir where to save the reports')
     parser.add_argument('--n-cores', type=int, default=1,
                         help='Number of parallel processes')
@@ -208,7 +188,7 @@ if __name__ == "__main__":
     main(
         mapped_file = args.mapped_file, 
         oligo_ref_file = args.ref_file,
-        output_dir = args.output_dir, 
+        output_file = args.output_file, 
         n_cores = args.n_cores,
     )
 

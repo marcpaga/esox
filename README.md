@@ -96,9 +96,9 @@ Here we check which oligos compose the repeats in each read and try to determine
 
 ```
 python scripts/dev/map_oligo_repeats.py \
---fastq-dir demo/dev/fastq \
+--fastq-file demo/dev/fastq/demo.fastq \
 --ref-file demo/dev/oligo_ref.fasta \
---output-file demo/dev/oligo_repeats.txt
+--output-file demo/dev/oligo_repeats/demo.txt
 ```
 
 #### Making oligo references
@@ -108,9 +108,9 @@ Based on the composition of each oligo concatemer read, we define a reference se
 
 ```
 python scripts/dev/make_oligo_references.py \
---mapped-file demo/dev/oligo_repeats.txt \
+--mapped-file demo/dev/oligo_repeats/demo.txt \
 --ref-file demo/dev/oligo_ref.fasta \
---output-dir demo/dev
+--output-file demo/dev/oligo_references/demo.fasta
 ```
 
 ## Why is it called esox?

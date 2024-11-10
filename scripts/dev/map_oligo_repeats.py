@@ -192,17 +192,10 @@ def listener_writer(queue, output_file):
         
 
 
-def main(fastq_dir, ref_file, output_file, n_cores, overwrite):
+def main(fastq_file, ref_file, output_file, n_cores):
 
     if os.path.exists(output_file):
-        if overwrite:
-            os.remove(output_file)
-        else:
-            df = pd.read_csv(output_file, header = 0, index_col = None)
-            processed_read_ids = set(np.unique(df['read_id']))
-    else:
-        processed_read_ids = set()
-        
+        raise FileExistsError("Output file already exists")
 
     oligo_references = read_fast(ref_file)
     oligo_references['head_adapter'] = HEAD_ADAPTER
@@ -210,28 +203,23 @@ def main(fastq_dir, ref_file, output_file, n_cores, overwrite):
 
     manager = mp.Manager() 
     queue = manager.Queue()  # write queue
-    pool = mp.Pool(n_cores + 2) # pool for multiprocessing
+    pool = mp.Pool(n_cores + 1) # pool for multiprocessing
     p = mp.Process(target = listener_writer, args = (queue, output_file))
     p.start()
 
     jobs = list()
-    for fastq_file in os.listdir(fastq_dir):
-        if not fastq_file.endswith('.fastq'):
+    fastq = read_fast(fastq_file)
+
+    for _, (k, v) in enumerate(fastq.items()):
+        read_id = k
+        original_basecalls = v[0]
+        if len(original_basecalls) < 60: # skip very short reads
             continue
-        fastq = read_fast(os.path.join(fastq_dir, fastq_file))
-    
-        for _, (k, v) in enumerate(fastq.items()):
-            read_id = k
-            if read_id in processed_read_ids:
-                continue
-            original_basecalls = v[0]
-            if len(original_basecalls) < 60: # skip very short reads
-                continue
-            if len(original_basecalls) > 20000:
-                continue
-            phredq_txt = v[2]
-            job = pool.apply_async(find_repeats, (original_basecalls, oligo_references, read_id, phredq_txt, queue))
-            jobs.append(job)
+        if len(original_basecalls) > 20000:
+            continue
+        phredq_txt = v[2]
+        job = pool.apply_async(find_repeats, (original_basecalls, oligo_references, read_id, phredq_txt, queue))
+        jobs.append(job)
 
     for job in tqdm(jobs):
         job.get()
@@ -249,7 +237,7 @@ def main(fastq_dir, ref_file, output_file, n_cores, overwrite):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Analyze the oligo composition of the reads based on basecalls')
-    parser.add_argument('--fastq-dir', type=str,
+    parser.add_argument('--fastq-file', type=str,
                         help='Dir where the fastq files are')
     parser.add_argument('--ref-file', type=str,
                         help='Fasta file with oligo references')
@@ -257,16 +245,13 @@ if __name__ == "__main__":
                         help='Dir where to save the reports')
     parser.add_argument('--n-cores', type=int, default=1,
                         help='Number of parallel processes')
-    parser.add_argument('--overwrite', action='store_true',
-                        help='Overwrite files if output file exists')
     
     args = parser.parse_args()
     
     main(
-        fastq_dir = args.fastq_dir, 
+        fastq_file = args.fastq_file, 
         ref_file = args.ref_file, 
         output_file = args.output_file, 
         n_cores = args.n_cores, 
-        overwrite = args.overwrite
     )
 
