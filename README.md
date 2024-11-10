@@ -113,6 +113,17 @@ python scripts/dev/make_oligo_references.py \
 --output-file demo/dev/oligo_references/demo.fasta
 ```
 
+#### Resquiggle oligo raw data
+
+We resquiggle the raw data using the references we created in the previous step.
+
+```
+python scripts/dev/resquiggle_oligo.py \
+--fast5-file demo/dev/fast5/demo.fast5 \
+--ref-file demo/dev/oligo_references/demo.fasta \
+--output-file demo/dev/oligo_resquiggle/demo.fasta
+```
+
 ## Why is it called esox?
 
 Most nanopore tools have fish names, and esox is the [genus of the pike fish](https://en.wikipedia.org/wiki/Esox), which ends in "ox", as in oxidation.
