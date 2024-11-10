@@ -1,0 +1,11 @@
+#
+# Alignment matrix used for oligo repeat matching and N base assignment
+#
+    A   C   G   T   N   K   *
+A   3  -3  -1  -2   3  -2  -5
+C  -3   3  -2  -3   3  -3  -5
+G  -1  -2   3  -3   2   2  -5
+T  -2  -3  -3   2   3   0  -5
+N   3   3   2   3   9   0  -5
+K  -2  -3   2   0   0   1  -5
+*  -5  -5  -5  -5  -5  -5  -5

@@ -1,3 +1,5 @@
+import os
+
 ## vocabulary of the 4 canonical bases and 8-oxoG
 ALL_BASES = ['A', 'C', 'G', 'T', 'o']
 
@@ -17,8 +19,22 @@ try:
     GAP_OPEN_PENALTY = 8
     GAP_EXTEND_PENALTY = 4
     LOCAL_ALIGN_FUNCTION = parasail.sg_qx_trace_striped_16
+    MATRIX = parasail.matrix_from_filename = parasail.Matrix(os.path.join(os.path.abspath(os.path.dirname(__file__)), "oligo_matrix.txt"))
 except ImportError:
     print('No alignment library')
+
+## design of the oligos
+# B = barcode
+# N = random base
+# M = modified bases
+# K = kmer bases
+# H = overhang bases
+FWD_OLIGO_DESIGN = 'BBBBBBBNNMMMMMNNNBBBBBBBKKKKKBBBBBBBHHHHHHHHHH'
+REV_OLIGO_DESIGN = 'BBBBBBBKKKKKBBBBBBBNNNKKKKKNNBBBBBBBHHHHHHHHHH'
+
+
+HEAD_ADAPTER = 'AATGTACTTCGTTCAGTTACGTATTGCT'
+TAIL_ADAPTER = 'GCAATACGTAACTGAACGAAGT'
 
 PHRED_NUMS={}
 for x in range(0,94):
