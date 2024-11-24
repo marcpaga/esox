@@ -148,6 +148,16 @@ e = data["e1"] # arrays of shape [n_examples, 100] with the expected normalized 
 s = data["s1"] # arrays of shape [n_examples, 100] with encoded basecalls aligned to the signal
 ```
 
+#### Training
+
+The model can be trained using the prepared data. The script provides a simple example loop on how to train the model using the prepared demo data.
+
+```
+python scripts/dev/train.py \
+--data-path demo/dev/nn_input \
+--output-path demo/dev/model
+```
+
 ## Why is it called esox?
 
 Most nanopore tools have fish names, and esox is the [genus of the pike fish](https://en.wikipedia.org/wiki/Esox), which ends in "ox", as in oxidation.

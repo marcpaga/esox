@@ -233,5 +233,29 @@ class BaseRemoraModel(BaseModel):
             p, _ = self.forward(batch)
             
         return p.exp()
+    
+    def train_step(self, batch):
+        """
+        Args:
+            batch (dict) dict fill with tensor just for prediction
+        """
+
+        batch = self._process_batch(batch)
+        logits, _ = self.forward(batch)
+            
+        return logits
+    
+    def validation_step(self, batch):
+        """
+        Args:
+            batch (dict) dict fill with tensor just for prediction
+        """
+
+        self.eval()
+        with torch.no_grad():
+            batch = self._process_batch(batch)
+            logits, _ = self.forward(batch)
+            
+        return logits
 
  
