@@ -82,17 +82,17 @@ python3 scripts/modcall.py \
 ```
 Again, please check `static/kmer_performance.txt` to decide what threshold to use per 5-mer based on the FP rate and your 8-oxo-dG expected abundance. In our work we used a threshold of 0.95 for most 5-mers. 5-mers not in the training dataset will have 0 fp and 0 fn.
 
-### Model training
+## Model training
 
 We provide scripts to process the oligo data from fast5 and fastq files into an adequate input format for model training. We also provide a script to train a model using the processed data with the used configuration in our research.
 
-#### Data
+### Data
 
-In this repository we provide demo files to test the scripts. The oligo dataset can be found in the ENA repository under the accession number [PRJEB46810](https://www.ebi.ac.uk/ena/browser/view/PRJEB76712).
+In this repository we provide demo files to test the scripts (check `demo/dev`). The oligo dataset can be found in the ENA repository under the accession number [PRJEB46810](https://www.ebi.ac.uk/ena/browser/view/PRJEB76712).
 
-#### Mapping oligo repeats
+### Mapping oligo repeats
 
-Here we check which oligos compose the repeats in each read and try to determine the random bases. 
+Here we check which oligos compose the repeats in each read and try to determine the random bases. The output will be a table with the read id, the oligos that have been identified, and the random bases based on the basecalling and their quality scores.
 
 ```
 python scripts/dev/map_oligo_repeats.py \
@@ -104,7 +104,6 @@ python scripts/dev/map_oligo_repeats.py \
 #### Making oligo references
 
 Based on the composition of each oligo concatemer read, we define a reference sequence for each read.
-
 
 ```
 python scripts/dev/make_oligo_references.py \
@@ -134,7 +133,19 @@ python scripts/dev/prepare_nn_input.py \
 --fast5-file demo/dev/fast5/demo.fast5 \
 --resquiggle-file demo/dev/oligo_resquiggle/demo.fasta \
 --output-file demo/dev/nn_input/demo.npz
+```
 
+The arrays can be loaded like this:
+
+```python
+import numpy as np
+
+data = np.load("demo/dev/nn_input/demo.npz")
+
+x = data["x"] # arrays of shape [n_examples, 100] with the normalized raw signal centered around a guanine/8-oxo-dG
+y = data["y"] # arrays of shape [n_examples, ] with the label (0 for G, 1 for 8-oxo-dG)
+e = data["e1"] # arrays of shape [n_examples, 100] with the expected normalized signal
+s = data["s1"] # arrays of shape [n_examples, 100] with encoded basecalls aligned to the signal
 ```
 
 ## Why is it called esox?

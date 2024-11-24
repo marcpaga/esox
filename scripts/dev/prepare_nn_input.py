@@ -14,6 +14,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from esox.fast_io import read_fast5, read_fast
 from esox.resquiggle import seq_to_signal
 from esox.normalization import med_mad
+from esox.remora_utils import find_cut_points_jit, cut_data_jit
+from esox.constants import ENCODING_DICT_CRF
 
 def chunkify(lst,n):
     return [lst[i::n] for i in range(n)]
@@ -146,22 +148,83 @@ def chunk_reads_and_write(
     y_list = list()
     e_list = list()
     
+    print('Chunking data')
     for read_data in tqdm(reads_data):
-        x, y, e = chunk_read(read_data, window_length, overlap, min_bases, max_bases, min_coverage)
-        if x is None:
+        xx, yy, ee = chunk_read(read_data, window_length, overlap, min_bases, max_bases, min_coverage)
+        if xx is None:
             continue
-        x_list.append(x)
-        y_list.append(y)
-        e_list.append(e)
+        x_list.append(xx)
+        y_list.append(yy)
+        e_list.append(ee)
         
-    X = np.vstack(x_list)
-    Y = np.vstack(y_list)
-    E = np.vstack(e_list)
+    x = np.vstack(x_list)
+    y = np.vstack(y_list)
+    e = np.vstack(e_list)
 
-    assert X.shape == Y.shape
-    assert X.shape == Y.shape
-    
-    np.savez(output_file, x = X, y = Y, e = E)
+    assert x.shape == y.shape
+    assert x.shape == e.shape
+
+    y = np.vectorize(ENCODING_DICT_CRF.get)(y)
+
+
+    array_keeper = {
+        'x': list(),
+        'y': list(),
+        'e1': list(), # expected
+        's1': list(), # predicted sequence
+    }
+    window_size = 100
+
+    total_oxog_calls = 0
+
+    print('Extracting 8-oxo-dG segments')
+    for i in tqdm(range(x.shape[0]), total=x.shape[0]):
+
+        oxog = True
+        g_calls = np.where(y[i] == 5)[0]
+        total_oxog_calls += len(g_calls)
+        if len(g_calls) == 0:
+            oxog = False
+            g_calls = np.where(y[i] == 3)[0]
+        
+        if len(g_calls) == 0:
+            continue
+        
+        cuts = np.zeros((len(g_calls), 2), dtype=np.int32)
+        cuts_with_coords = np.zeros((len(g_calls), ), dtype=bool)
+
+        cuts, _ = find_cut_points_jit(
+            g_calls, 2000, window_size//2, cuts, cuts_with_coords
+        )
+
+        xcut = np.zeros((cuts.shape[0], window_size), dtype = np.float32)
+        xcut = cut_data_jit(
+            cuts,
+            x[i],
+            xcut,
+        )
+        array_keeper['x'].append(xcut)
+
+
+        scut = np.zeros((cuts.shape[0], window_size), dtype = np.int8)
+        scut = cut_data_jit(cuts, y[i], scut)
+        array_keeper['s1'].append(scut)
+
+        ecut = np.zeros((cuts.shape[0], window_size), dtype = np.float32)
+        ecut = cut_data_jit(cuts, e[i], ecut)
+        array_keeper['e1'].append(ecut)
+        if oxog:
+            array_keeper['y'].append(np.ones((cuts.shape[0], )))
+        else:
+            array_keeper['y'].append(np.zeros((cuts.shape[0], )))
+
+    for k, v in array_keeper.items():
+        array_keeper[k] = np.concatenate(v, axis=0)
+
+    np.savez_compressed(
+        output_file,
+        **array_keeper,
+    )
 
 def main(reference_file, fast5_file, resquiggle_file, output_file, 
          window_length, window_overlap, min_bases, max_bases, min_coverage):    
