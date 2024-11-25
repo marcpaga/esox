@@ -19,9 +19,11 @@ It is important to understand the limitations of this model to avoid misinterpre
 
 - **Sample preparation**: the standard ONT library prep contains a FFPE repair step, which contains *Fpg*, a DNA glycosylase that is responsible for removing 8-oxo-dG from DNA. If your sample was prepared using this protocol, it is likely that most of the 8-oxo-dG has been removed from the DNA, and this model will not be able to detect it, or it its abundance will be lower than the false positive rate.
 
+
+
 ## Installation
 
-The 8-oxo-dG calling consists of two steps. Please install the dependencies as follows.
+The 8-oxo-dG calling consists of two steps. Please install the dependencies as follows. 
 
 ```bash
 conda create -n esox_env python=3.7
@@ -30,12 +32,12 @@ conda install -c bioconda ont-tombo  # this might take a while
 pip install -r requirements.txt
 ```
 
-For a full list of dependencies see: `conda.txt`, dependencies in `requirements.txt` are installed via pip.
+For a full list of dependencies see: `conda.txt`, dependencies in `requirements.txt` are installed via pip. The installation of ont-tombo might be slow.
 
 ## Usage
 
 For demo data, here is a small dataset that can be used to test the model. The data is already basecalled using Guppy/Dorado, and the raw data is in the `demo/fast5` folder. The basecalled data is in the `demo/fastq` folder.
-Example outputs are in `demo/basecall_out` and `demo/modcall_out`.
+Example outputs are in `demo/basecall_out` and `demo/modcall_out`. The processing of these files should take a few minutes when using an up-to-date GPU (year 2020). The code has been tested on the Linux OS.
 
 [Download link](https://surfdrive.surf.nl/files/index.php/s/X2kRYzBOg68eQwc)
 
@@ -84,7 +86,7 @@ Again, please check `static/kmer_performance.txt` to decide what threshold to us
 
 ## Model training
 
-We provide scripts to process the oligo data from fast5 and fastq files into an adequate input format for model training. We also provide a script to train a model using the processed data with the used configuration in our research.
+We provide scripts to process the oligo data from fast5 and fastq files into an adequate input format for model training. We also provide a script to train a model using the processed data with the used configuration in our research. The processing of these demo files should take a about ~30 minutes total on a single CPU.
 
 ### Data
 
