@@ -5,7 +5,7 @@ This repository contains the code for the 8-oxo-dG detection model using nanopor
 - Basecalling model: this model is used to basecall 8-oxo-dG as G.
 - Modification calling model: this model evaluates any basecalled G to determine if it is 8-oxo-dG.
 
-For more information, please read our [publication]([https://www.biorxiv.org/content/10.1101/2024.05.17.594638v1.abstract](https://www.nature.com/articles/s41467-025-60391-3)).
+For more information, please read our [publication](https://www.nature.com/articles/s41467-025-60391-3).
 
 ## Limitations
 
