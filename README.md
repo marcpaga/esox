@@ -166,7 +166,7 @@ Most nanopore tools have fish names, and esox is the [genus of the pike fish](ht
 
 ## Citation
 
-If you use our model, please cite our pre-print:
+If you use our model, please cite our paper:
 
 ```
 Pagès-Gallego, M., van Soest, D.M.K., Besselink, N.J.M. et al. Direct detection of 8-oxo-dG using nanopore sequencing. Nat Commun 16, 5236 (2025). https://doi.org/10.1038/s41467-025-60391-3
