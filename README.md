@@ -5,7 +5,7 @@ This repository contains the code for the 8-oxo-dG detection model using nanopor
 - Basecalling model: this model is used to basecall 8-oxo-dG as G.
 - Modification calling model: this model evaluates any basecalled G to determine if it is 8-oxo-dG.
 
-For more information, please read our [pre-print](https://www.biorxiv.org/content/10.1101/2024.05.17.594638v1.abstract).
+For more information, please read our [publication]([https://www.biorxiv.org/content/10.1101/2024.05.17.594638v1.abstract](https://www.nature.com/articles/s41467-025-60391-3)).
 
 ## Limitations
 
@@ -169,6 +169,5 @@ Most nanopore tools have fish names, and esox is the [genus of the pike fish](ht
 If you use our model, please cite our pre-print:
 
 ```
-Marc Pagès-Gallego, Daan M.K. van Soest, Nicolle J.M. Besselink, Roy Straver, Janneke P. Keijer, Carlo Vermeulen, Alessio Marcozzi, Markus J. van Roosmalen, Ruben van Boxtel, Boudewijn M.T. Burgering, Tobias B. Dansen, Jeroen de Ridder
-bioRxiv 2024.05.17.594638; doi: https://doi.org/10.1101/2024.05.17.594638 
+Pagès-Gallego, M., van Soest, D.M.K., Besselink, N.J.M. et al. Direct detection of 8-oxo-dG using nanopore sequencing. Nat Commun 16, 5236 (2025). https://doi.org/10.1038/s41467-025-60391-3
 ```
