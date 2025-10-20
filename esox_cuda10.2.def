@@ -1,0 +1,76 @@
+Bootstrap: docker
+From: andrewseidl/nvidia-cuda:10.2-runtime-ubuntu20.04
+
+%labels
+    Author  Þorgils Hjálmarsson
+    Description "Singularity image with CUDA 10.2, esox, and dependencies"
+
+%post
+    rm -f /etc/apt/sources.list.d/cuda*.list || true
+    rm -f /etc/apt/sources.list.d/nvidia*.list || true
+    export DEBIAN_FRONTEND=noninteractive
+    ln -fs /usr/share/zoneinfo/Europe/ /etc/localtime
+    apt-get update && apt-get install -y tzdata
+    dpkg-reconfigure --frontend noninteractive tzdata
+    # --- Update and basic packages ---
+    apt-get update && apt-get install -y \
+        wget \
+        git \
+        curl \
+        bzip2 \
+        build-essential \
+        ca-certificates \
+        libglib2.0-0 \
+        libxext6 \
+        libsm6 \
+        libxrender1 \
+        libssl-dev \
+        libffi-dev \
+        r-base \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    # --- Install Miniconda ---
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    bash /tmp/miniconda.sh -b -p /opt/conda
+    rm /tmp/miniconda.sh
+    export PATH="/opt/conda/bin:$PATH"
+    /opt/conda/bin/conda init bash
+
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+    cd /opt
+    git clone https://github.com/marcpaga/esox.git
+    cd esox
+
+    sed -i '/^cupy-cuda102==/d' requirements.txt
+    sed -i '/^nvidia-cublas-cu11==/d' requirements.txt
+    sed -i '/^nvidia-cuda-nvrtc-cu11==/d' requirements.txt
+    sed -i '/^nvidia-cuda-runtime-cu11==/d' requirements.txt
+    sed -i '/^nvidia-cudnn-cu11==/d' requirements.txt
+    # --- Create conda env and install from conda.txt ---
+    /opt/conda/bin/conda create -y -n esox_env python=3.7
+    /opt/conda/bin/conda run -n esox_env conda install -y -c conda-forge -c bioconda --file scripts/conda.txt || true
+    /opt/conda/bin/conda run -n esox_env conda install -y -c conda-forge -c bioconda cython || true
+    /opt/conda/bin/conda run -n esox_env conda install -y -c conda-forge -c bioconda ont-tombo || true
+
+    # --- Install pip packages (requirements.txt) ---
+    /opt/conda/bin/conda run -n esox_env pip install --upgrade pip
+    /opt/conda/bin/conda run -n esox_env pip install cupy-cuda102==10.6.0 nvidia-cublas-cu11==11.10.3.66 nvidia-cuda-nvrtc-cu11==11.7.99 nvidia-cuda-runtime-cu11==11.7.99 nvidia-cudnn-cu11==8.5.0.96
+    /opt/conda/bin/conda run -n esox_env pip install -r /opt/esox/requirements.txt
+
+
+    rm /opt/conda/envs/esox_env/etc/conda/activate.d/activate-binutils_linux-64.sh
+    rm /opt/conda/envs/esox_env/etc/conda/activate.d/activate-gcc_linux-64.sh
+    rm /opt/conda/envs/esox_env/etc/conda/activate.d/activate-gfortran_linux-64.sh
+    rm /opt/conda/envs/esox_env/etc/conda/activate.d/activate-gxx_linux-64.sh
+    rm -rf /opt/esox
+%environment
+    export PATH="/opt/conda/bin:$PATH"
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate esox_env
+    export CUDA_HOME="/usr/local/cuda"
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64":$LD_LIBRARY_PATH
+    export PATH="/usr/local/cuda/bin":$PATH
+    export ESOX_HOME="/opt/esox"

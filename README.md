@@ -34,6 +34,7 @@ pip install -r requirements.txt
 
 For a full list of dependencies see: `conda.txt`, dependencies in `requirements.txt` are installed via pip. The installation of ont-tombo might be slow.
 
+
 ## Usage
 
 For demo data, here is a small dataset that can be used to test the model. The data is already basecalled using Guppy/Dorado, and the raw data is in the `demo/fast5` folder. The basecalled data is in the `demo/fastq` folder.
@@ -158,6 +159,24 @@ The model can be trained using the prepared data. The script provides a simple e
 python scripts/dev/train.py \
 --data-path demo/dev/nn_input \
 --output-path demo/dev/model
+```
+# Singularity
+The singularity definition file makes it possible to reproduce the environment accross multiple different systems and HPC clusters running newer versions of CUDA.
+Create the singularity image from the definition file
+``` bash
+singularity build esox.sif esox_cuda10.2.def
+```
+## Usage 
+I use basecalling for example:
+``` bash
+singularity exec --nv esox.sif python3 scripts/basecall.py \
+--fast5-path demo/fast5 \
+--fastq-path demo/fastq \
+--output-path demo/basecall_out \
+--model-file static/models/bonito.pt \
+--progress-bar \
+--device cuda:0 \
+--demo
 ```
 
 ## Why is it called esox?
